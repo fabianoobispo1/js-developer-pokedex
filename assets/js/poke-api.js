@@ -1,7 +1,7 @@
 
 const pokeApi = {}
 
-function convertPokeApiDetailToPokemon(pokeDetail) {
+async function convertPokeApiDetailToPokemon(pokeDetail) {
     const pokemon = new Pokemon()
     pokemon.number = pokeDetail.id
     pokemon.name = pokeDetail.name
@@ -13,6 +13,19 @@ function convertPokeApiDetailToPokemon(pokeDetail) {
     pokemon.type = type
 
     pokemon.photo = pokeDetail.sprites.other.dream_world.front_default
+
+    pokemon.species = await getPokemonsSpecies(pokeDetail.species.url, "genus");
+    pokemon.height = pokeDetail.height;
+    pokemon.weight = pokeDetail.weight;
+  
+    const abilities = pokeDetail.abilities.map(
+      (abilitySlot) => abilitySlot.ability.name
+    );
+  
+    pokemon.pokeballUrl = "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg"
+  
+    pokemon.abilities = abilities;
+
 
     return pokemon
 }
@@ -33,3 +46,10 @@ pokeApi.getPokemons = (offset = 0, limit = 5) => {
         .then((detailRequests) => Promise.all(detailRequests))
         .then((pokemonsDetails) => pokemonsDetails)
 }
+
+function getPokemonsSpecies(url, variavel) {
+    return fetch(url)
+      .then((response) => response.json())
+      .then((species) => species.genera[7])
+      .then((speciesGenus) => speciesGenus[variavel]);
+  }
